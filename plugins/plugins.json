@@ -1,0 +1,5 @@
+{
+    "list": "./list.js",
+    "masking": "./masking.js",
+    "authorization": "./authorization.js"
+}
