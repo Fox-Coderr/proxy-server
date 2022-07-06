@@ -1,24 +1,17 @@
-//Plugin that maskis both the origin and the destination
+// Plugin that masks both the origin and the destination
 
-const { createProxyMiddleware } = require('http-proxy-middleware');
-
-const API_SERVICE_URL = "https://jsonplaceholder.typicode.com";
-
-function load(app) {
-
-    //receive a request for json_placeholder and the server sent the same request to the API_SERVICE_URL
-    //masking the origin and returning the response
-    app.server.use('/json_placeholder', createProxyMiddleware({
-        target: API_SERVICE_URL,
-        changeOrigin: true,
-        pathRewrite: {
-            [`^/json_placeholder`]: '',
-        },
-    }));
-  }
-
+const load = async (req, res) => {
+    //masking the origin
+    //check and remove host from header
+    if(req.headers.host){
+        delete req.headers.host
+    }
+    return true
+}
+  
 //nothing to do on unload
-function unload(app) {  
+const unload = async (req, res) => {
+  
 }
 
 module.exports = {

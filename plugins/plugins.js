@@ -2,6 +2,9 @@
 
 const fs = require("fs");
 
+const pluginsReq = JSON.parse(fs.readFileSync('./plugins/plugins_req.json'));
+const pluginsRes = JSON.parse(fs.readFileSync('./plugins/plugins_res.json'));
+
 class Plugins {
   constructor(app) {
     this.app = app;
@@ -9,26 +12,34 @@ class Plugins {
   }
 
   //load the plugins list that need to be loaded
-  async loadFromConfig(path='./plugins/plugins.json') {
-    const plugins = JSON.parse(fs.readFileSync(path));
-    console.log(plugins)
-    for (let plugin in plugins) {
-      if (plugins[plugin]) {
-        this.load(plugin,plugins[plugin]);
-      }
-    }
+  async loadFromRequestConfig(req, res) {    
+    return Object.keys(pluginsReq).map( async (plugin) =>{
+      return this.load(req, res,plugin,pluginsReq[plugin])
+        .catch(function(){
+          throw "403";
+      })
+    })
+  }
+
+  async loadFromResponseConfig(req, res) {    
+    return Object.keys(pluginsRes).map( async (plugin) =>{
+      return this.load(req, res,plugin,pluginsRes[plugin])
+        .catch(function(){
+          throw "403";
+      })
+    })
   }
 
   //Main load function
-  async load(plugin,path) {
+  async load(req, res,plugin,path) {
     try {
       const module = require(path);
       this.plugins[plugin] = module;
-      await this.plugins[plugin].load(this.app);
-      console.log(`Loaded plugin: '${plugin}'`);
+      return this.plugins[plugin].load(req, res);
     } catch (e) {
-      console.log(`Failed to load '${plugin}'`)
-      this.app.stop();
+      console.log(`Failed to load '${plugin}'`,e)
+      res.sendStatus(403);
+      throw "403";
     }
   }
 
