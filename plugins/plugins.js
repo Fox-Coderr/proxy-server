@@ -11,7 +11,7 @@ class Plugins {
     this.plugins = {};
   }
 
-  //load the plugins list that need to be loaded
+  //load all request plugins
   async loadFromRequestConfig(req, res) {    
     return Object.keys(pluginsReq).map( async (plugin) =>{
       return this.load(req, res,plugin,pluginsReq[plugin])
@@ -21,6 +21,7 @@ class Plugins {
     })
   }
 
+  //load all response plugins
   async loadFromResponseConfig(req, res) {    
     return Object.keys(pluginsRes).map( async (plugin) =>{
       return this.load(req, res,plugin,pluginsRes[plugin])

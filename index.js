@@ -26,9 +26,11 @@ class App {
     //proxy
     this.server.use('', async (client_req, client_res) => {  
       let plugins = this.plugins
+      //load all request plugins
       let queue_req = await plugins.loadFromRequestConfig(client_req, client_res)
       try{
         await Promise.all(queue_req)      
+        //if all plugins finished do:
         let options = {
           hostname: API_SERVICE_URL,
           path: client_req.url,
@@ -37,9 +39,11 @@ class App {
         };
         let proxy_request = http.request(options);
         proxy_request.addListener('response', async function (proxy_response) {  
+          //load all response plugins
           let queue_res = await plugins.loadFromResponseConfig(client_req, client_res)
           try{
             await Promise.all(queue_res)   
+            //if all plugins finished do:
             proxy_response.addListener('data', function(chunk) {
               client_res.write(chunk, 'binary');
             });
@@ -50,7 +54,7 @@ class App {
           }catch(error){
             if(error == '403'){}
             else{
-              console.log('error', error)
+              res.sendStatus(500);
             }        
           };
         });
@@ -63,7 +67,7 @@ class App {
       }catch(error){
         if(error == '403'){}
         else{
-          console.log('error', error)
+          res.sendStatus(500);
         }        
       };
     });    
@@ -82,7 +86,7 @@ class App {
 const app = new App();
 app.start();
 
-// ["exit", "SIGINT", "SIGUSR1", "SIGUSR2", "SIGTERM", "uncaughtException"].forEach(event => {
-//   process.on(event, () => app.stop());
-// });
+["exit", "SIGINT", "SIGUSR1", "SIGUSR2", "SIGTERM", "uncaughtException"].forEach(event => {
+  process.on(event, () => app.stop());
+});
 
