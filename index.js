@@ -1,12 +1,13 @@
 const express = require('express');
 const Plugins = require('./plugins/plugins');
 const http = require('http');
+require('dotenv').config();
 
 const API_SERVICE_URL = "jsonplaceholder.typicode.com";
 
 // Configuration
-const PORT = 8001;
-const HOST = "localhost";
+const PORT = process.env.PORT;
+const HOST = process.env.HOST;
 
 class App {
   constructor() {
